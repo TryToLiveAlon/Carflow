@@ -1,5 +1,5 @@
 document.getElementById("fetchDetails").addEventListener("click", async () => {
-  const vehicleNumber = document.getElementById("vehicleNumber").value.trim();
+  const vehicleNumber = document.getElementById("NumberPlate").value.trim();
   const resultDiv = document.getElementById("result");
 
   // Clear previous result
