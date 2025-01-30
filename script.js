@@ -1,18 +1,18 @@
 document.getElementById("fetchDetails").addEventListener("click", async () => {
-  const vehicleNumber = document.getElementById("NumberPlate").value.trim();
+  const numberPlate = document.getElementById("numberPlate").value.trim();
   const resultDiv = document.getElementById("result");
 
   // Clear previous result
   resultDiv.innerHTML = "";
 
-  if (!vehicleNumber) {
-    resultDiv.innerHTML = `<p class="error">Please enter a valid vehicle number.</p>`;
+  if (!numberPlate) {
+    resultDiv.innerHTML = `<p class="error">Please enter a valid vehicle number plate.</p>`;
     return;
   }
 
   try {
-    // Call the backend API
-    const response = await fetch(`/api/vehicle?NumberPlate=${vehicleNumber}`);
+    // Call the backend API with 'numberPlate' as a query parameter
+    const response = await fetch(`/api/vehicle?numberPlate=${numberPlate}`);
 
     if (!response.ok) {
       const error = await response.json();
