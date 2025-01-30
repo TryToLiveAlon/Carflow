@@ -12,7 +12,7 @@ document.getElementById("fetchDetails").addEventListener("click", async () => {
 
   try {
     // Call the backend API
-    const response = await fetch(`/api/vehicle?NumberPlate=${NumberPlate}`);
+    const response = await fetch(`/api/vehicle?NumberPlate=${vehicleNumber}`);
 
     if (!response.ok) {
       const error = await response.json();
