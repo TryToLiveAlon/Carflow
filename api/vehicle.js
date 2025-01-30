@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    const { vehicleNumber } = req.query;
+    const { NumberPlate } = req.query;
 
-    if (!vehicleNumber) {
+    if (!NumberPlate) {
       return res.status(400).json({
         error: "Vehicle number is required as a query parameter",
       });
