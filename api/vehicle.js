@@ -1,9 +1,9 @@
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    const { NumberPlate } = req.query;
+    const { numberPlate } = req.query;
 
-    
-    if (!NumberPlate) {
+    // Check if NumberPlate is provided
+    if (!numberPlate) {
       return res.status(400).json({
         error: "Vehicle number is required as a query parameter",
       });
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       // Prepare the request body
       const apiBody = {
         URL: "GetVaahanDetailsByVehicleNo",
-        Props: [vehicleNumber],
+        Props: [numberPlate],  // Use NumberPlate instead of vehicleNumber
       };
 
       // Prepare headers
