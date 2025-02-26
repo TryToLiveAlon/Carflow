@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/movie",
+      "destination": "/api/movie.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/vehicle.js"
     }
