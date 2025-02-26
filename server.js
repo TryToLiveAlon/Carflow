@@ -5,8 +5,8 @@ import vehicleHandler from "./api/vehicle.js"; // Importing vehicle API
 const app = express();
 app.use(express.json());
 
-app.post("/api/movie", movieHandler);
-app.get("/api/vehicle", vehicleHandler); // Adjust method if needed
+app.get("/api/movie", movieHandler); // Changed to GET request
+app.get("/api/vehicle", vehicleHandler); // Vehicle API remains the same
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
