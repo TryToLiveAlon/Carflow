@@ -1,83 +1,58 @@
-import express from "express";
 import axios from "axios";
-import * as cheerio from "cheerio"; // Correct way to import cheerio
-import fetch from "node-fetch";
+import * as cheerio from "cheerio";
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const OMDB_API_KEY = "4d146d7"; // Replace with your actual OMDB API Key
-
-app.use(express.json()); // Middleware to parse JSON requests
-
-// Function to get IMDb ID from OMDB API
-async function getIMDBId(movieName) {
-    try {
-        const response = await axios.get(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
-        const data = response.data;
-        if (data.Response === "True") {
-            return data.imdbID;
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching IMDb ID:", error);
-        return null;
+export default async function handler(req, res) {
+    if (req.method !== "POST") {
+        return res.status(405).json({ error: "Method Not Allowed" });
     }
-}
 
-// Function to scrape IMDb data
-async function scrapeIMDB(imdbID) {
+    const { movieName } = req.body;
+    if (!movieName) {
+        return res.status(400).json({ error: "Movie name is required!" });
+    }
+
+    const OMDB_API_KEY = "4d146d7"; // Replace with your actual OMDB API key
+
     try {
+        // Fetch IMDb ID from OMDB API
+        const omdbResponse = await axios.get(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
+        const omdbData = omdbResponse.data;
+
+        if (omdbData.Response !== "True") {
+            return res.status(404).json({ error: "Movie not found!" });
+        }
+
+        const imdbID = omdbData.imdbID;
         const imdbURL = `https://www.imdb.com/title/${imdbID}/`;
-        const response = await fetch(imdbURL, { 
-            headers: { "User-Agent": "Mozilla/5.0" } 
-        });
 
-        if (!response.ok) throw new Error("Failed to fetch IMDb page");
-
-        const html = await response.text();
-        const $ = cheerio.load(html);
+        // Scrape IMDb
+        const imdbResponse = await axios.get(imdbURL, { headers: { "User-Agent": "Mozilla/5.0" } });
+        const $ = cheerio.load(imdbResponse.data);
         const jsonData = $("script[type='application/ld+json']").html();
-        if (!jsonData) return { error: "Failed to extract JSON data" };
+
+        if (!jsonData) {
+            return res.status(500).json({ error: "Failed to extract JSON data" });
+        }
 
         const imdbData = JSON.parse(jsonData);
 
-        return {
-            ratingValue: imdbData.aggregateRating?.ratingValue || "N/A",
-            description: imdbData.description || "No description found.",
-            director: imdbData.creator?.filter(creator => creator["@type"] === "Person").map(d => d.name).join(", ") || "Unknown",
+        const movieDetails = {
+            title: imdbData.name || "Unknown",
+            rating: imdbData.aggregateRating?.ratingValue || "N/A",
+            description: imdbData.description || "No description available.",
+            director: imdbData.creator?.filter(person => person["@type"] === "Person").map(d => d.name).join(", ") || "Unknown",
             genres: imdbData.genre || [],
             releaseDate: imdbData.datePublished || "Unknown",
             languages: imdbData.inLanguage || "Unknown",
             images: {
-                poster: imdbData.image || "No image found",
-                trailer_thumbnail: imdbData.trailer?.thumbnailUrl || "No trailer image found"
+                poster: imdbData.image || "No image available",
+                trailer: imdbData.trailer?.thumbnailUrl || "No trailer available"
             }
         };
+
+        return res.status(200).json(movieDetails);
     } catch (error) {
-        console.error("Error scraping IMDb:", error);
-        return { error: "Failed to scrape IMDb" };
+        console.error("Error fetching movie details:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 }
-
-// API Route - POST request to fetch movie details (New route: /api/movie)
-app.post("/api/movie", async (req, res) => {
-    const { movieName } = req.body;
-
-    if (!movieName) {
-        return res.status(400).json({ error: "Movie name is required" });
-    }
-
-    const imdbID = await getIMDBId(movieName);
-    if (!imdbID) {
-        return res.status(404).json({ error: "Movie not found!" });
-    }
-
-    const movieDetails = await scrapeIMDB(imdbID);
-    res.json(movieDetails);
-});
-
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}/api/movie`);
-});
-      
