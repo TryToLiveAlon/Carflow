@@ -1,16 +1,15 @@
-
-import * as cheerio from "cheerio"; // Correct way to import cheerio
 import fetch from "node-fetch";
-const express = require("express");
-const axios = require("axios");
+import * as cheerio from "cheerio";
+import express from "express";
 
-const router = express.Router();
+const app = express();
 const OMDB_API_KEY = "4d146d7";  // Replace with your actual OMDB API Key
 
+// Function to get IMDb ID from OMDB API
 async function getIMDBId(movieName) {
     try {
-        const response = await axios.get(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
-        const data = response.data;
+        const response = await fetch(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
+        const data = await response.json();
         if (data.Response === "True") {
             return data.imdbID;
         }
@@ -21,12 +20,11 @@ async function getIMDBId(movieName) {
     }
 }
 
+// Function to scrape IMDb page
 async function scrapeIMDB(imdbID) {
     try {
         const imdbURL = `https://www.imdb.com/title/${imdbID}/`;
-        const response = await fetch(imdbURL, { 
-            headers: { "User-Agent": "Mozilla/5.0" } 
-        });
+        const response = await fetch(imdbURL, { headers: { "User-Agent": "Mozilla/5.0" } });
 
         if (!response.ok) throw new Error("Failed to fetch IMDb page");
 
@@ -55,19 +53,17 @@ async function scrapeIMDB(imdbID) {
     }
 }
 
-router.get("/", async (req, res) => {
-    const movieName = req.query.name;
+// API Route
+app.get("/api/movie", async (req, res) => {
+    const { name } = req.query;
+    if (!name) return res.status(400).json({ error: "Movie name is required!" });
 
-    if (!movieName) {
-        return res.status(400).json({ error: "Movie name is required!" });
-    }
-
-    const imdbID = await getIMDBId(movieName);
+    const imdbID = await getIMDBId(name);
     if (!imdbID) return res.status(404).json({ error: "Movie not found!" });
 
     const movieDetails = await scrapeIMDB(imdbID);
     res.json(movieDetails);
 });
 
-export default router;
-    
+export default app;
+                
