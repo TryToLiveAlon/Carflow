@@ -1,7 +1,8 @@
-import axios from "axios";
+
 import * as cheerio from "cheerio"; // Correct way to import cheerio
 import fetch from "node-fetch";
-import express from "express";
+const express = require("express");
+const axios = require("axios");
 
 const router = express.Router();
 const OMDB_API_KEY = "4d146d7";  // Replace with your actual OMDB API Key
