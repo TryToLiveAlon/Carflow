@@ -9,8 +9,16 @@
       "destination": "/api/gpt.js"
     },
     {
-      "source": "/api/(.*)",
+      "source": "/api/vehicle",
       "destination": "/api/vehicle.js"
+    },
+    {
+      "source": "/api/mail",
+      "destination": "/api/mail.js"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1.js"
     }
   ]
 }
