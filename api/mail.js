@@ -3,13 +3,13 @@ import mongoose from "mongoose";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 import cron from "node-cron";
-import dotenv from "dotenv";
 
-dotenv.config();
 const router = express.Router();
 
-// ✅ Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
+// ✅ Connect to MongoDB (Directly Using URL)
+const MONGO_URI = "mongodb+srv://RB14goCNTApsB54I:RB14goCNTApsB54I@cluster0.8qjbx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log("✅ MongoDB Connected"))
@@ -133,4 +133,4 @@ cron.schedule("0 0 * * *", async () => {
 });
 
 export default router;
-            
+        
