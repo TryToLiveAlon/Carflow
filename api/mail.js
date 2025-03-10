@@ -3,14 +3,17 @@ import mongoose from "mongoose";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 import cron from "node-cron";
+import dotenv from "dotenv";
 
+dotenv.config();
 const router = express.Router();
 
 // ✅ Connect to MongoDB
-mongoose.connect("mongodb+srv://RB14goCNTApsB54I:RB14goCNTApsB54I@cluster0.8qjbx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-});
+}).then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
 // ✅ Define User Schema
 const UserSchema = new mongoose.Schema({
@@ -19,10 +22,9 @@ const UserSchema = new mongoose.Schema({
     apiKey: { type: String, required: true, unique: true },
     lastUsed: { type: Date, default: Date.now }
 });
-
 const User = mongoose.model("User", UserSchema);
 
-// ✅ 1. Register API with Login Verification
+// ✅ 1. Register API with Email Verification
 router.get("/register", async (req, res) => {
     try {
         const { gmail, password } = req.query;
@@ -30,16 +32,15 @@ router.get("/register", async (req, res) => {
             return res.status(400).json({ error: "Missing gmail or password" });
         }
 
-        // Check if user already exists
         const existingUser = await User.findOne({ gmail });
         if (existingUser) {
             return res.status(400).json({ error: "Email already registered" });
         }
 
-        // Generate a unique API key
+        // Generate API key
         const apiKey = crypto.randomBytes(16).toString("hex");
 
-        // Nodemailer transporter for self-verification
+        // Create Nodemailer Transporter
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -48,22 +49,21 @@ router.get("/register", async (req, res) => {
             }
         });
 
-        // Verification email to itself
+        // Verification Email
         const mailOptions = {
             from: gmail,
             to: gmail,
             subject: "Login Verification",
-            text: "This is an automatic email to verify that your account is successfully connected."
+            text: "Your email is successfully connected!"
         };
 
-        // Try sending email to itself
         try {
             await transporter.sendMail(mailOptions);
         } catch (error) {
             return res.status(403).json({ error: "Invalid Gmail or Password. Login failed." });
         }
 
-        // Save user to database if email sent successfully
+        // Save user to database
         const newUser = new User({ gmail, password, apiKey });
         await newUser.save();
 
@@ -92,7 +92,7 @@ router.post("/", async (req, res) => {
         user.lastUsed = new Date();
         await user.save();
 
-        // Nodemailer transporter
+        // Nodemailer Transporter
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -119,13 +119,12 @@ router.post("/", async (req, res) => {
     }
 });
 
-// ✅ 3. Auto-Remove Inactive Users
+// ✅ 3. Auto-Remove Inactive Users (Every Day at Midnight)
 cron.schedule("0 0 * * *", async () => {
     try {
         const twoMonthsAgo = new Date();
         twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
-        // Delete users inactive for 2 months
         const deletedUsers = await User.deleteMany({ lastUsed: { $lt: twoMonthsAgo } });
         console.log(`✅ Removed ${deletedUsers.deletedCount} inactive users`);
     } catch (error) {
@@ -134,4 +133,4 @@ cron.schedule("0 0 * * *", async () => {
 });
 
 export default router;
-  
+            
