@@ -23,7 +23,7 @@ const gptHandler = async (req, res) => {
         const modifiedResponse = {
             ...data,
             provider: "https://t.me/TryToLiveAlon",
-            api_documentation: "https://death-docs.vercel.app"
+            api_documentation: "https://death-docs.vercel.app/API/Quick%20Start"
         };
 
         res.json(modifiedResponse);
