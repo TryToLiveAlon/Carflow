@@ -22,10 +22,8 @@ const gptHandler = async (req, res) => {
         // Modify the response to include additional info
         const modifiedResponse = {
             ...data,
-            additional_info: [
-                { provider: "Trytolivealon" },
-                { api_documentation: "here" }
-            ]
+            provider: "https://t.me/TryToLiveAlon",
+            api_documentation: "https://death-docs.vercel.app"
         };
 
         res.json(modifiedResponse);
