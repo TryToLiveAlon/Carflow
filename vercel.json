@@ -5,6 +5,10 @@
       "destination": "/api/movie.js"
     },
     {
+      "source": "/api/gpt",
+      "destination": "/api/gpt.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/vehicle.js"
     }
