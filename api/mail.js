@@ -3,14 +3,10 @@ import nodemailer from "nodemailer";
 
 const router = express.Router();
 
-// ✅ Email Sending Logic
 const mailHandler = async (req, res) => {
-    console.log("Received request body:", req.body); // Debug log
-
     try {
-        const { gmail, password, to, subject, content, isHtml, attachmentUrl } = req.body;
+        const { gmail, password, to, subject, content, isHtml, attachment } = req.body;
 
-        // ✅ Validate Required Parameters
         if (!gmail || !password || !to || !subject || !content) {
             return res.status(400).json({
                 error: "Missing required parameters",
@@ -25,15 +21,13 @@ const mailHandler = async (req, res) => {
             auth: { user: gmail, pass: password }
         });
 
-        // ✅ Construct Email Options
+        // ✅ Set email format (HTML or Plain Text)
         const mailOptions = {
             from: gmail,
             to,
             subject,
-            [isHtml ? "html" : "text"]: content, // Sends HTML or plain text
-            attachments: attachmentUrl
-                ? [{ filename: attachmentUrl.split("/").pop(), path: attachmentUrl }]
-                : [] // Attachments (optional)
+            [isHtml ? "html" : "text"]: content, // If isHtml is true, send as HTML, else text
+            attachments: attachment ? [{ filename: "attachment", path: attachment }] : []
         };
 
         // ✅ Send Email
@@ -55,8 +49,9 @@ const mailHandler = async (req, res) => {
     }
 };
 
-// ✅ Only allow POST requests
+// ✅ Use only POST, reject GET
 router.post("/", mailHandler);
 router.all("/", (req, res) => res.status(405).json({ error: "Method Not Allowed" }));
 
-export default router;  // ✅ Corrected export
+export default router;
+                
