@@ -1,13 +1,16 @@
-import nodemailer from "nodemailer";
 import express from "express";
+import nodemailer from "nodemailer";
 
 const router = express.Router();
 
-// ✅ Mail Handler Function
+// ✅ Email Sending Logic
 const mailHandler = async (req, res) => {
+    console.log("Received request body:", req.body); // Debug log
+
     try {
         const { gmail, password, to, subject, content, isHtml, attachmentUrl } = req.body;
 
+        // ✅ Validate Required Parameters
         if (!gmail || !password || !to || !subject || !content) {
             return res.status(400).json({
                 error: "Missing required parameters",
@@ -22,15 +25,15 @@ const mailHandler = async (req, res) => {
             auth: { user: gmail, pass: password }
         });
 
-        // ✅ Prepare email options
+        // ✅ Construct Email Options
         const mailOptions = {
             from: gmail,
             to,
             subject,
-            [isHtml === "true" ? "html" : "text"]: content,
+            [isHtml ? "html" : "text"]: content, // Sends HTML or plain text
             attachments: attachmentUrl
                 ? [{ filename: attachmentUrl.split("/").pop(), path: attachmentUrl }]
-                : []
+                : [] // Attachments (optional)
         };
 
         // ✅ Send Email
@@ -54,10 +57,6 @@ const mailHandler = async (req, res) => {
 
 // ✅ Allow only POST requests
 router.post("/", mailHandler);
-
-// ❌ Reject GET requests
-router.get("/", (req, res) => {
-    res.status(405).json({ error: "Method Not Allowed. Use POST instead." });
-});
+router.get("/", (req, res) => res.status(405).json({ error: "Method Not Allowed" }));
 
 export default router;
