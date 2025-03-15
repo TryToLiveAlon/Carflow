@@ -6,6 +6,7 @@ import mailHandler from "./api/mail.js";
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ✅ API Routes
 app.use("/api/movie", movieHandler);
