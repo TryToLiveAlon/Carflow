@@ -55,8 +55,8 @@ const mailHandler = async (req, res) => {
     }
 };
 
-// ✅ Allow only POST requests
+// ✅ Only allow POST requests
 router.post("/", mailHandler);
-router.get("/", (req, res) => res.status(405).json({ error: "Method Not Allowed" }));
+router.all("/", (req, res) => res.status(405).json({ error: "Method Not Allowed" }));
 
-export default router;
+export default router;  // ✅ Corrected export
