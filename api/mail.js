@@ -1,6 +1,8 @@
 import nodemailer from "nodemailer";
 import express from "express";
 
+const router = express.Router();
+
 const mailHandler = async (req, res) => {
     try {
         const { gmail, password, to, subject, content, isHtml, attachmentUrl } = req.body;
@@ -19,7 +21,7 @@ const mailHandler = async (req, res) => {
             auth: { user: gmail, pass: password }
         });
 
-        // ✅ Email Options
+        // ✅ Prepare email options
         const mailOptions = {
             from: gmail,
             to,
@@ -49,4 +51,12 @@ const mailHandler = async (req, res) => {
     }
 };
 
-export default mailHandler;
+// ✅ Allow only POST requests
+router.post("/", mailHandler);
+
+// ❌ Return "Method Not Allowed" for GET requests
+router.get("/", (req, res) => {
+    res.status(405).json({ error: "Method Not Allowed. Use POST instead." });
+});
+
+export default router;
