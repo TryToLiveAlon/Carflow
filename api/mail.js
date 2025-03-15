@@ -3,6 +3,7 @@ import express from "express";
 
 const router = express.Router();
 
+// ✅ Mail Handler Function
 const mailHandler = async (req, res) => {
     try {
         const { gmail, password, to, subject, content, isHtml, attachmentUrl } = req.body;
@@ -54,7 +55,7 @@ const mailHandler = async (req, res) => {
 // ✅ Allow only POST requests
 router.post("/", mailHandler);
 
-// ❌ Return "Method Not Allowed" for GET requests
+// ❌ Reject GET requests
 router.get("/", (req, res) => {
     res.status(405).json({ error: "Method Not Allowed. Use POST instead." });
 });
