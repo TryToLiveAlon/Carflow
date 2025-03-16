@@ -2,7 +2,7 @@ import express from "express";
 import movieHandler from "./api/movie.js";  
 import vehicleHandler from "./api/vehicle.js";  
 import gptHandler from "./api/gpt.js";
-import { sendEmail } from "./api/mail.js";
+import sendEmail from "./api/mail.js";
 
 const app = express();
 app.use(express.json());
