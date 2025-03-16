@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import fetch from "node-fetch";
 import { parseStringPromise } from "xml2js";
 
-export const sendEmail = async (req, res) => {
+const sendEmail = async (req, res) => {
     try {
         const { from, password, to, subject, isHtml, useTemplate, xmlUrl, attachmentUrl, content, ...params } = req.body;
 
@@ -112,3 +112,7 @@ export const sendEmail = async (req, res) => {
         });
     }
 };
+
+// ✅ Default export
+export default sendEmail;
+                
