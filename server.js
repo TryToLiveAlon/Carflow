@@ -2,7 +2,7 @@ import express from "express";
 import movieHandler from "./api/movie.js";  
 import vehicleHandler from "./api/vehicle.js";  
 import gptHandler from "./api/gpt.js";
-import mailHandler from "./api/mail.js"; // Ensure correct import path
+import { sendEmail } from "./api/mail.js";
 
 const app = express();
 app.use(express.json());
@@ -11,7 +11,7 @@ app.use(express.json());
 app.use("/api/movie", movieHandler);
 app.use("/api/vehicle", vehicleHandler);
 app.use("/api/gpt", gptHandler);
-app.use("/api/mail", mailHandler); // Attach the mail handler
+app.post("/api/mail", sendEmail); // Attach the mail handler
 
 // 404 Route Handling
 app.use((req, res) => {
