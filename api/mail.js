@@ -1,39 +1,43 @@
 import nodemailer from "nodemailer";
 
-const mailHandler = async ({ from, password, to, subject, content, isHtml, attachmentUrl }) => {
-    try {
-        if (!from || !password || !to || !subject || !content) {
-            return { error: "Missing required parameters" };
-        }
+export default async function handler(req, res) {
+    if (req.method !== "GET") {
+        return res.status(405).json({ error: "Method Not Allowed. Use GET instead." });
+    }
 
-        // Configure mail transporter
+    const { from, password, to, subject, content, isHtml, attachmentUrl } = req.query;
+
+    if (!from || !password || !to || !subject || !content) {
+        return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    try {
         const transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
-            port: 465, // Use 587 if 465 doesn’t work
-            secure: true, // true for port 465, false for 587
+            port: 587, // Try 465 if 587 doesn’t work
+            secure: false, // Use `true` for port 465
             auth: {
                 user: from,
-                pass: password, // Use an App Password instead of your real password
+                pass: password, // Use an App Password instead of real password
             },
-            connectionTimeout: 10000, // Set a timeout of 10 seconds
+            connectionTimeout: 10000, // Set timeout to 10s
         });
 
-        // Email options
         const mailOptions = {
             from,
             to,
             subject,
             [isHtml === "true" ? "html" : "text"]: content,
-            attachments: attachmentUrl ? [{ filename: "attachment.jpg", path: attachmentUrl }] : [],
+            attachments: attachmentUrl
+                ? [{ filename: "attachment.jpg", path: attachmentUrl }]
+                : [],
         };
 
-        // Send the email
         await transporter.sendMail(mailOptions);
-        return { success: "Email sent successfully!" };
+        return res.status(200).json({ success: "Email sent successfully!" });
 
     } catch (error) {
-        return { error: "Failed to send email", details: error.message };
+        return res.status(500).json({ error: "Failed to send email", details: error.message });
     }
-};
-
-export default mailHandler;
+                }
+    
