@@ -8,7 +8,11 @@ export default async function handler(req, res) {
     const { from, password, to, subject, content, isHtml, attachmentUrl } = req.query;
 
     if (!from || !password || !to || !subject || !content) {
-        return res.status(400).json({ error: "Missing required parameters" });
+        return res.status(400).json({ error: "Missing required parameters",
+                                    IMPORTANT: {
+                provider: "https://t.me/TryToLiveAlone",
+                documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                                    }});
     }
 
     try {
@@ -34,10 +38,18 @@ export default async function handler(req, res) {
         };
 
         await transporter.sendMail(mailOptions);
-        return res.status(200).json({ success: "Email sent successfully!" });
+        return res.status(200).json({ success: "Email sent successfully!",
+                                    IMPORTANT: {
+                provider: "https://t.me/TryToLiveAlone",
+                documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                                    }});
 
     } catch (error) {
-        return res.status(500).json({ error: "Failed to send email", details: error.message });
+        return res.status(500).json({ error: "Failed to send email",
+                                     IMPORTANT: {
+                provider: "https://t.me/TryToLiveAlone",
+                documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                                     }, details: error.message });
     }
                 }
     
