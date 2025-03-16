@@ -8,11 +8,14 @@ const mailHandler = async ({ from, password, to, subject, content, isHtml, attac
 
         // Configure mail transporter
         const transporter = nodemailer.createTransport({
-            service: "gmail",
+            host: "smtp.gmail.com",
+            port: 465, // Use 587 if 465 doesn’t work
+            secure: true, // true for port 465, false for 587
             auth: {
                 user: from,
-                pass: password,
+                pass: password, // Use an App Password instead of your real password
             },
+            connectionTimeout: 10000, // Set a timeout of 10 seconds
         });
 
         // Email options
