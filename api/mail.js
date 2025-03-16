@@ -1,55 +1,114 @@
 import nodemailer from "nodemailer";
+import fetch from "node-fetch";
+import { parseStringPromise } from "xml2js";
 
-export default async function handler(req, res) {
-    if (req.method !== "GET") {
-        return res.status(405).json({ error: "Method Not Allowed. Use GET instead." });
-    }
-
-    const { from, password, to, subject, content, isHtml, attachmentUrl } = req.query;
-
-    if (!from || !password || !to || !subject || !content) {
-        return res.status(400).json({ error: "Missing required parameters",
-                                    IMPORTANT: {
-                provider: "https://t.me/TryToLiveAlone",
-                documentation: "https://death-docs.vercel.app/API/Quick%20Start"
-                                    }});
-    }
-
+export const sendEmail = async (req, res) => {
     try {
+        const { from, password, to, subject, isHtml, useTemplate, xmlUrl, attachmentUrl, content, ...params } = req.body;
+
+        if (!from || !password || !to || !subject) {
+            return res.status(400).json({
+                error: "Missing required fields: from, password, to, subject",
+                IMPORTANT: {
+                    provider: "https://t.me/TryToLiveAlone",
+                    documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                }
+            });
+        }
+
+        let emailContent = content || "";
+
+        // Fetch and parse XML template if provided
+        if (useTemplate && xmlUrl) {
+            try {
+                const response = await fetch(xmlUrl);
+                const xmlText = await response.text();
+                const parsedXml = await parseStringPromise(xmlText);
+
+                if (parsedXml.email && parsedXml.email.template) {
+                    emailContent = parsedXml.email.template[0];
+
+                    // Replace placeholders {key} with values from params
+                    emailContent = emailContent.replace(/\{(\w+)\}/g, (match, key) => params[key] || match);
+                } else {
+                    return res.status(400).json({
+                        error: "Invalid XML structure. 'template' not found.",
+                        IMPORTANT: {
+                            provider: "https://t.me/TryToLiveAlone",
+                            documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                        }
+                    });
+                }
+            } catch (error) {
+                return res.status(500).json({
+                    error: "Failed to fetch or parse XML template",
+                    details: error.message,
+                    IMPORTANT: {
+                        provider: "https://t.me/TryToLiveAlone",
+                        documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                    }
+                });
+            }
+        }
+
+        // Create email transporter
         const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587, // Try 465 if 587 doesn’t work
-            secure: false, // Use `true` for port 465
-            auth: {
-                user: from,
-                pass: password, // Use an App Password instead of real password
-            },
-            connectionTimeout: 10000, // Set timeout to 10s
+            service: "gmail",
+            auth: { user: from, pass: password },
         });
 
-        const mailOptions = {
+        // Email options
+        let mailOptions = {
             from,
             to,
             subject,
-            [isHtml === "true" ? "html" : "text"]: content,
-            attachments: attachmentUrl
-                ? [{ filename: "attachment.jpg", path: attachmentUrl }]
-                : [],
+            text: isHtml ? undefined : emailContent,
+            html: isHtml ? emailContent : undefined,
+            attachments: [],
         };
 
-        await transporter.sendMail(mailOptions);
-        return res.status(200).json({ success: "Email sent successfully!",
-                                    IMPORTANT: {
+        // Handle attachments
+        if (attachmentUrl) {
+            try {
+                const fileResponse = await fetch(attachmentUrl);
+                const fileBuffer = await fileResponse.buffer();
+                const fileName = attachmentUrl.split("/").pop();
+
+                mailOptions.attachments.push({
+                    filename: fileName,
+                    content: fileBuffer,
+                });
+            } catch (error) {
+                return res.status(500).json({
+                    error: "Failed to fetch attachment",
+                    details: error.message,
+                    IMPORTANT: {
+                        provider: "https://t.me/TryToLiveAlone",
+                        documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                    }
+                });
+            }
+        }
+
+        // Send email
+        const info = await transporter.sendMail(mailOptions);
+        res.json({
+            success: true,
+            messageId: info.messageId,
+            IMPORTANT: {
                 provider: "https://t.me/TryToLiveAlone",
                 documentation: "https://death-docs.vercel.app/API/Quick%20Start"
-                                    }});
+            }
+        });
 
     } catch (error) {
-        return res.status(500).json({ error: "Failed to send email",
-                                     IMPORTANT: {
+        res.status(500).json({
+            error: "Failed to send email",
+            details: error.message,
+            IMPORTANT: {
                 provider: "https://t.me/TryToLiveAlone",
                 documentation: "https://death-docs.vercel.app/API/Quick%20Start"
-                                     }, details: error.message });
+            }
+        });
     }
-                }
-    
+};
