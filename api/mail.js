@@ -11,7 +11,7 @@ const sendEmail = async (req, res) => {
                 error: "Missing required fields: from, password, to, subject",
                 IMPORTANT: {
                     provider: "https://t.me/TryToLiveAlone",
-                    documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                    documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
                 }
             });
         }
@@ -35,7 +35,7 @@ const sendEmail = async (req, res) => {
                         error: "Invalid XML structure. 'template' not found.",
                         IMPORTANT: {
                             provider: "https://t.me/TryToLiveAlone",
-                            documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                            documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
                         }
                     });
                 }
@@ -45,7 +45,7 @@ const sendEmail = async (req, res) => {
                     details: error.message,
                     IMPORTANT: {
                         provider: "https://t.me/TryToLiveAlone",
-                        documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                        documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
                     }
                 });
             }
@@ -84,7 +84,7 @@ const sendEmail = async (req, res) => {
                     details: error.message,
                     IMPORTANT: {
                         provider: "https://t.me/TryToLiveAlone",
-                        documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                        documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
                     }
                 });
             }
@@ -97,7 +97,7 @@ const sendEmail = async (req, res) => {
             messageId: info.messageId,
             IMPORTANT: {
                 provider: "https://t.me/TryToLiveAlone",
-                documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
             }
         });
 
@@ -107,7 +107,7 @@ const sendEmail = async (req, res) => {
             details: error.message,
             IMPORTANT: {
                 provider: "https://t.me/TryToLiveAlone",
-                documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+                documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
             }
         });
     }
