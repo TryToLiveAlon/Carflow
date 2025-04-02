@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     const { numberPalate } = req.query;
 
     // Check if NumberPlate is provided
-    if (!numberPlate) {
+    if (!numberPalate) {
       return res.status(400).json({
         error: "Vehicle number is required as a query parameter",
       });
