@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    const { numberP1late } = req.query;
+    const { numberPalate } = req.query;
 
     // Check if NumberPlate is provided
     if (!numberPlate) {
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       // Prepare the request body
       const apiBody = {
         URL: "GetVaahanDetailsByVehicleNo",
-        Props: [numberP1late],  // Use NumberPlate instead of vehicleNumber
+        Props: [numberPalate],  // Use NumberPlate instead of vehicleNumber
       };
 
       // Prepare headers
