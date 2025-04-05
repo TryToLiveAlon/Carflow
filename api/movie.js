@@ -1,69 +1,61 @@
+// api/movie.js
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
-import express from "express";
 
-const app = express();
-const OMDB_API_KEY = "4d146d7";  // Replace with your actual OMDB API Key
+const OMDB_API_KEY = "4d146d7";
 
-// Function to get IMDb ID from OMDB API
 async function getIMDBId(movieName) {
-    try {
-        const response = await fetch(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
-        const data = await response.json();
-        if (data.Response === "True") {
-            return data.imdbID;
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching IMDb ID:", error);
-        return null;
-    }
+  const res = await fetch(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
+  const data = await res.json();
+  return data.Response === "True" ? data.imdbID : null;
 }
 
-// Function to scrape IMDb page
+async function getTrailerMp4(url) {
+  const html = await (await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0" },
+  })).text();
+
+  const $ = cheerio.load(html);
+  const script = $("script")
+    .map((_, el) => $(el).html())
+    .get()
+    .find(str => str && str.includes("imdbPlayerJson"));
+
+  const match = script?.match(/imdbPlayerJson\s*=\s*({.*});/s);
+  if (!match) return null;
+
+  const json = JSON.parse(match[1]);
+  const mp4 = json.videoPlayerObject?.video?.playbackURLs?.find(v => v.mimeType === "video/mp4");
+  return mp4?.url || null;
+}
+
 async function scrapeIMDB(imdbID) {
-    try {
-        const imdbURL = `https://www.imdb.com/title/${imdbID}/`;
-        const response = await fetch(imdbURL, { headers: { "User-Agent": "Mozilla/5.0" } });
+  const imdbURL = `https://www.imdb.com/title/${imdbID}/`;
+  const html = await (await fetch(imdbURL)).text();
+  const $ = cheerio.load(html);
+  const jsonData = $("script[type='application/ld+json']").html();
+  const imdbData = JSON.parse(jsonData);
 
-        if (!response.ok) throw new Error("Failed to fetch IMDb page");
+  const trailerUrl = imdbData.trailer?.url;
+  const trailerMp4 = trailerUrl ? await getTrailerMp4(trailerUrl) : null;
 
-        const html = await response.text();
-        const $ = cheerio.load(html);
-        const jsonData = $("script[type='application/ld+json']").html();
-        if (!jsonData) return { error: "Failed to extract JSON data" };
-
-        const imdbData = JSON.parse(jsonData);
-
-        return {
-            ratingValue: imdbData.aggregateRating?.ratingValue || "N/A",
-            description: imdbData.description || "No description found.",
-            director: imdbData.creator?.filter(creator => creator["@type"] === "Person").map(d => d.name).join(", ") || "Unknown",
-            genres: imdbData.genre || [],
-            releaseDate: imdbData.datePublished || "Unknown",
-            languages: imdbData.inLanguage || "Unknown",
-            images: {
-                poster: imdbData.image || "No image found",
-                trailer_thumbnail: imdbData.trailer?.thumbnailUrl || "No trailer image found"
-            }
-        };
-    } catch (error) {
-        console.error("Error scraping IMDb:", error);
-        return { error: "Failed to scrape IMDb" };
-    }
+  return {
+    title: imdbData.name,
+    rating: imdbData.aggregateRating?.ratingValue,
+    director: imdbData.director?.[0]?.name || "Unknown",
+    genres: imdbData.genre,
+    poster: imdbData.image,
+    trailer: trailerMp4,
+  };
 }
 
-// API Route
-app.get("/api/movie", async (req, res) => {
-    const { name } = req.query;
-    if (!name) return res.status(400).json({ error: "Movie name is required!" });
+export default async function handler(req, res) {
+  const { name } = req.query;
+  if (!name) return res.status(400).json({ error: "Missing movie name" });
 
-    const imdbID = await getIMDBId(name);
-    if (!imdbID) return res.status(404).json({ error: "Movie not found!" });
+  const imdbID = await getIMDBId(name);
+  if (!imdbID) return res.status(404).json({ error: "Movie not found" });
 
-    const movieDetails = await scrapeIMDB(imdbID);
-    res.json(movieDetails);
-});
-
-export default app;
-                
+  const data = await scrapeIMDB(imdbID);
+  res.json(data);
+}
