@@ -1,12 +1,10 @@
-import express from "express";
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 
-const router = express.Router();
 const OMDB_API_KEY = "4d146d7"; // Replace with your real OMDB key
 
-// Get IMDb ID from OMDB
-async function getIMDBId(movieName) {
+// Get IMDb data
+const getIMDBData = async (movieName) => {
     try {
         const res = await fetch(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
         const data = await res.json();
@@ -15,10 +13,10 @@ async function getIMDBId(movieName) {
         console.error("OMDB error:", err);
         return null;
     }
-}
+};
 
 // Get IMDb trailer page URL
-async function getTrailerPageUrl(imdbID) {
+const getTrailerPageUrl = async (imdbID) => {
     try {
         const imdbURL = `https://www.imdb.com/title/${imdbID}/`;
         const res = await fetch(imdbURL, { headers: { "User-Agent": "Mozilla/5.0" } });
@@ -34,42 +32,47 @@ async function getTrailerPageUrl(imdbID) {
         console.error("Error getting trailer page:", err);
         return null;
     }
-}
+};
 
-// Extract multiple valid .mp4 trailer links
-async function getAllMp4FromTrailerPage(trailerPageUrl) {
+// Extract all .mp4 trailer links
+const getAllMp4FromTrailerPage = async (trailerPageUrl) => {
     try {
         const res = await fetch(trailerPageUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
         const html = await res.text();
 
-        // Extract all .mp4 links and filter out .m3u8
         const allMp4Links = [...html.matchAll(/https:\/\/.*?\.mp4\?[^"]+/g)]
             .map(match => match[0].replace(/\\u0026/g, "&"))
             .filter(link => !link.includes(".m3u8"));
 
-        return [...new Set(allMp4Links)]; // Remove duplicates if any
+        return [...new Set(allMp4Links)];
     } catch (err) {
         console.error("Error extracting mp4 trailer links:", err);
         return [];
     }
-}
+};
 
-// Main route
-router.get("/", async (req, res) => {
-    const { name } = req.query;
-    if (!name) return res.status(400).json({ error: "Missing movie name" });
+// 🎬 Main API Handler
+const movieHandler = async (req, res) => {
+    try {
+        const { name } = req.query;
+        if (!name) return res.status(400).json({ error: "Missing movie name" });
 
-    const movieData = await getIMDBId(name);
-    if (!movieData) return res.status(404).json({ error: "Movie not found" });
+        const movieData = await getIMDBData(name);
+        if (!movieData) return res.status(404).json({ error: "Movie not found" });
 
-    const imdbID = movieData.imdbID;
-    const trailerPageUrl = await getTrailerPageUrl(imdbID);
-    const trailers = trailerPageUrl ? await getAllMp4FromTrailerPage(trailerPageUrl) : [];
+        const trailerPageUrl = await getTrailerPageUrl(movieData.imdbID);
+        const trailers = trailerPageUrl ? await getAllMp4FromTrailerPage(trailerPageUrl) : [];
 
-    res.json({
-        ...movieData,
-        trailers: trailers // returns an array like [url1, url2, ...]
-    });
-});
+        res.json({
+            ...movieData,
+            trailers,
+            provider: "https://t.me/TryToLiveAlon",
+            api_documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+        });
+    } catch (error) {
+        console.error("Movie API Error:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
 
-export default router;
+export default movieHandler;
