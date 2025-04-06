@@ -1,61 +1,75 @@
-// api/movie.js
+import express from "express";
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 
-const OMDB_API_KEY = "4d146d7";
+const router = express.Router();
+const OMDB_API_KEY = "4d146d7"; // Replace with your real OMDB key
 
+// Get IMDb ID from OMDB
 async function getIMDBId(movieName) {
-  const res = await fetch(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
-  const data = await res.json();
-  return data.Response === "True" ? data.imdbID : null;
+    try {
+        const res = await fetch(`http://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${encodeURIComponent(movieName)}`);
+        const data = await res.json();
+        return data.Response === "True" ? data : null;
+    } catch (err) {
+        console.error("OMDB error:", err);
+        return null;
+    }
 }
 
-async function getTrailerMp4(url) {
-  const html = await (await fetch(url, {
-    headers: { "User-Agent": "Mozilla/5.0" },
-  })).text();
+// Get IMDb trailer page URL
+async function getTrailerPageUrl(imdbID) {
+    try {
+        const imdbURL = `https://www.imdb.com/title/${imdbID}/`;
+        const res = await fetch(imdbURL, { headers: { "User-Agent": "Mozilla/5.0" } });
+        const html = await res.text();
+        const $ = cheerio.load(html);
 
-  const $ = cheerio.load(html);
-  const script = $("script")
-    .map((_, el) => $(el).html())
-    .get()
-    .find(str => str && str.includes("imdbPlayerJson"));
+        const ldJson = $("script[type='application/ld+json']").html();
+        if (!ldJson) return null;
 
-  const match = script?.match(/imdbPlayerJson\s*=\s*({.*});/s);
-  if (!match) return null;
-
-  const json = JSON.parse(match[1]);
-  const mp4 = json.videoPlayerObject?.video?.playbackURLs?.find(v => v.mimeType === "video/mp4");
-  return mp4?.url || null;
+        const json = JSON.parse(ldJson);
+        return json?.trailer?.url || null;
+    } catch (err) {
+        console.error("Error getting trailer page:", err);
+        return null;
+    }
 }
 
-async function scrapeIMDB(imdbID) {
-  const imdbURL = `https://www.imdb.com/title/${imdbID}/`;
-  const html = await (await fetch(imdbURL)).text();
-  const $ = cheerio.load(html);
-  const jsonData = $("script[type='application/ld+json']").html();
-  const imdbData = JSON.parse(jsonData);
+// Extract multiple valid .mp4 trailer links
+async function getAllMp4FromTrailerPage(trailerPageUrl) {
+    try {
+        const res = await fetch(trailerPageUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+        const html = await res.text();
 
-  const trailerUrl = imdbData.trailer?.url;
-  const trailerMp4 = trailerUrl ? await getTrailerMp4(trailerUrl) : null;
+        // Extract all .mp4 links and filter out .m3u8
+        const allMp4Links = [...html.matchAll(/https:\/\/.*?\.mp4\?[^"]+/g)]
+            .map(match => match[0].replace(/\\u0026/g, "&"))
+            .filter(link => !link.includes(".m3u8"));
 
-  return {
-    title: imdbData.name,
-    rating: imdbData.aggregateRating?.ratingValue,
-    director: imdbData.director?.[0]?.name || "Unknown",
-    genres: imdbData.genre,
-    poster: imdbData.image,
-    trailer: trailerMp4,
-  };
+        return [...new Set(allMp4Links)]; // Remove duplicates if any
+    } catch (err) {
+        console.error("Error extracting mp4 trailer links:", err);
+        return [];
+    }
 }
 
-export default async function handler(req, res) {
-  const { name } = req.query;
-  if (!name) return res.status(400).json({ error: "Missing movie name" });
+// Main route
+router.get("/", async (req, res) => {
+    const { name } = req.query;
+    if (!name) return res.status(400).json({ error: "Missing movie name" });
 
-  const imdbID = await getIMDBId(name);
-  if (!imdbID) return res.status(404).json({ error: "Movie not found" });
+    const movieData = await getIMDBId(name);
+    if (!movieData) return res.status(404).json({ error: "Movie not found" });
 
-  const data = await scrapeIMDB(imdbID);
-  res.json(data);
-}
+    const imdbID = movieData.imdbID;
+    const trailerPageUrl = await getTrailerPageUrl(imdbID);
+    const trailers = trailerPageUrl ? await getAllMp4FromTrailerPage(trailerPageUrl) : [];
+
+    res.json({
+        ...movieData,
+        trailers: trailers // returns an array like [url1, url2, ...]
+    });
+});
+
+export default router;
