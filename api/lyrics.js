@@ -1,5 +1,5 @@
 import axios from "axios";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio"; // Updated import
 import iso8601 from "iso8601-duration";
 import { parse, format } from "date-fns";
 
@@ -84,4 +84,4 @@ export default async function lyricsHandler(req, res) {
         console.error(err.message);
         return res.status(500).json({ error: "Failed to fetch lyrics", details: err.message });
     }
-          }
+}
