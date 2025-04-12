@@ -30,12 +30,25 @@ function formatReleaseDate(raw) {
 
 async function searchGaana(songName) {
     const searchUrl = `https://gaana.com/search/${encodeURIComponent(songName)}`;
-    const { data } = await axios.get(searchUrl, {
-        headers: { "User-Agent": "Mozilla/5.0" }
-    });
-    const $ = cheerio.load(data);
-    const songPath = $("a[href^='/song/']").first().attr("href");
-    return songPath ? `https://gaana.com${songPath}` : null;
+    
+    try {
+        const { data } = await axios.get(searchUrl, {
+            headers: { "User-Agent": "Mozilla/5.0" }
+        });
+
+        const $ = cheerio.load(data);
+        const songPath = $("a[href^='/song/']").first().attr("href");
+
+        // If no song is found, return null
+        if (!songPath) {
+            throw new Error("Song not found on Gaana");
+        }
+
+        return `https://gaana.com${songPath}`;
+    } catch (error) {
+        console.error(`Error fetching song URL for "${songName}": ${error.message}`);
+        throw new Error(`Song not found on Gaana: ${songName}`);
+    }
 }
 
 async function fetchLyricsData(songUrl) {
