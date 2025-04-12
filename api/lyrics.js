@@ -50,9 +50,17 @@ async function fetchLyricsData(songUrl) {
 
     const raw = JSON.parse(jsonScript);
 
+    // Use a more robust regex to extract lyrics and decode properly
     const lyricsMatch = jsonScript.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-    const lyrics = lyricsMatch ? JSON.parse(`"${lyricsMatch[1]}"`) : "";
+    let lyrics = lyricsMatch ? JSON.parse(`"${lyricsMatch[1]}"`) : "";
 
+    // Clean up any problematic control characters or escape sequences in lyrics
+    lyrics = lyrics.replace(/\\u[\dA-F]{4}/g, (match) => {
+        return String.fromCharCode(parseInt(match.replace('\\u', ''), 16));
+    });
+    
+    lyrics = lyrics.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"'); // handling common escape sequences
+    
     return {
         name: raw.name || "",
         url: raw.url || "",
