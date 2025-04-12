@@ -3,11 +3,15 @@ import movieHandler from "./api/movie.js";
 import vehicleHandler from "./api/vehicle.js";  
 import gptHandler from "./api/gpt.js";
 import sendEmail from "./api/mail.js";
+import lyricsHandler from "./api/lyrics.js";
+
+
 
 const app = express();
 app.use(express.json());
 
 // API Routes
+app.get("/api/lyrics", lyricsHandler);
 app.use("/api/movie", movieHandler);
 app.use("/api/vehicle", vehicleHandler);
 app.use("/api/gpt", gptHandler);
