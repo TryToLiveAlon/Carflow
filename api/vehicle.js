@@ -2,7 +2,6 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     const { numberPalate } = req.query;
 
-    // Check if NumberPlate is provided
     if (!numberPalate) {
       return res.status(400).json({
         error: "Vehicle number is required as a query parameter",
@@ -10,30 +9,28 @@ export default async function handler(req, res) {
     }
 
     try {
-      // API URL for fetching vehicle details
       const apiUrl = "https://www.smcinsurance.com/central/centralcall/CallReqWithHeader";
 
-      // Prepare the request body
       const apiBody = {
         URL: "GetVaahanDetailsByVehicleNo",
-        Props: [numberPalate],  // Use NumberPlate instead of vehicleNumber
+        Props: [numberPalate],
       };
 
-      // Prepare headers
+      // Cookies copied from PHP code
+      const cookies =
+        "MCBC=3RTHdIU5%2F348nmXlg1nUJPra3Tf8KTJ0FTsTB2%2B4zZ8%3D%3Aba3cd8476600b153f8a66d22448a397d88f4842e7e6d065b92473113b125ee20; _gcl_au=1.1.2014085917.1734760610; _ga_E0SG8XLD9W=GS1.1.1734760610.1.0.1734760610.60.0.0; _ga=GA1.1.1773637558.1734760611";
+
       const headers = {
         "Content-Type": "application/json",
-        Cookie:
-          "MCBC=3RTHdIU5%2F348nmXlg1nUJPra3Tf8KTJ0FTsTB2%2B4zZ8%3D%3Aba3cd8476600b153f8a66d22448a397d88f4842e7e6d065b92473113b125ee20; _gcl_au=1.1.2014085917.1734760610; _ga_E0SG8XLD9W=GS1.1.1734760610.1.0.1734760610.60.0.0; _ga=GA1.1.1773637558.1734760611';"
+        Cookie: cookies,
       };
 
-      // Fetch data from the external API
       const response = await fetch(apiUrl, {
         method: "POST",
         headers,
         body: JSON.stringify(apiBody),
       });
 
-      // Parse the response
       const data = await response.json();
 
       if (response.ok) {
@@ -51,7 +48,6 @@ export default async function handler(req, res) {
       });
     }
   } else {
-    // Method not allowed
     res.setHeader("Allow", ["GET"]);
     return res.status(405).json({
       error: "Method not allowed",
