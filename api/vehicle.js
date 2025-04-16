@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       const headers = {
         "Content-Type": "application/json",
         Cookie:
-          "MCBC=3RTHdIU5%2F348nmXlg1nUJPra3Tf8KTJ0FTsTB2%2B4zZ8%3D%3Aba3cd8476600b153f8a66d22448a397d88f4842e7e6d065b92473113b125ee20; _gcl_au=1.1.2014085917.1734760610; _ga_E0SG8XLD9W=GS1.1.1734760610.1.0.1734760610.60.0.0; _ga=GA1.1.1773637558.1734760611';
+          "MCBC=3RTHdIU5%2F348nmXlg1nUJPra3Tf8KTJ0FTsTB2%2B4zZ8%3D%3Aba3cd8476600b153f8a66d22448a397d88f4842e7e6d065b92473113b125ee20; _gcl_au=1.1.2014085917.1734760610; _ga_E0SG8XLD9W=GS1.1.1734760610.1.0.1734760610.60.0.0; _ga=GA1.1.1773637558.1734760611';"
       };
 
       // Fetch data from the external API
