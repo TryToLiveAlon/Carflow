@@ -4,7 +4,7 @@ import vehicleHandler from "./api/vehicle.js";
 import gptHandler from "./api/gpt.js";
 import sendEmail from "./api/mail.js";
 import lyricsHandler from "./api/lyrics.js";
-import gptHandler from "./api/gpt.js";
+import gptHandler4 from "./api/gpt4.js";
 
 
 
@@ -16,7 +16,7 @@ app.get("/api/lyrics", lyricsHandler);
 app.use("/api/movie", movieHandler);
 app.use("/api/vehicle", vehicleHandler);
 app.use("/api/gpt", gptHandler);
-app.use("/api/gpt", gptHandler);
+app.use("/api/gpt4", gptHandler4);
 app.post("/api/mail", sendEmail); // Attach the mail handler
 
 // 404 Route Handling
