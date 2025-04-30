@@ -1,21 +1,16 @@
-import express from "express";
-import fetch from "node-fetch"; // Use v2 for CommonJS/ESM compatibility
+export default async function handler(req, res) {
+  const credit = { credit: "https://t.me/TryToLiveAlon" };
+  const { text } = req.query;
 
-const router = express.Router();
-
-router.get("/", async (req, res) => {
-  const credit = { credit: "@AzR_projects" };
-  const text = (req.query.text || "").trim();
-
-  if (!text) {
+  if (!text || !text.trim()) {
     return res.status(400).json({ ...credit, error: "❌ Missing text parameter" });
   }
 
   const url = "https://mistral-ai.chat/wp-admin/admin-ajax.php";
-  const formData = new URLSearchParams();
-  formData.append("action", "ai_chat_response");
-  formData.append("message", text);
-  formData.append("nonce", "83103efe99");
+  const params = new URLSearchParams();
+  params.append("action", "ai_chat_response");
+  params.append("message", text.trim());
+  params.append("nonce", "83103efe99");
 
   try {
     const response = await fetch(url, {
@@ -26,29 +21,28 @@ router.get("/", async (req, res) => {
         "x-requested-with": "XMLHttpRequest",
         "Content-Type": "application/x-www-form-urlencoded"
       },
-      body: formData
+      body: params
     });
 
     if (!response.ok) {
-      return res.status(response.status).json({ ...credit, error: `⚠️ API error: ${response.status}` });
+      return res.status(response.status).json({
+        ...credit,
+        error: `⚠️ Mistral API error: ${response.status}`
+      });
     }
 
-    const apiResponse = await response.json();
-    const message = apiResponse?.data?.message?.trim() || "No valid response received.";
+    const result = await response.json();
+    const message = result?.data?.message?.trim() || "No valid response received.";
 
-    return res.json({
+    res.status(200).json({
       ...credit,
       status: "✅ Success",
       message
     });
-
-  } catch (error) {
-    return res.status(500).json({
+  } catch (err) {
+    res.status(500).json({
       ...credit,
-      error: `⚠️ API request failed: ${error.message}`
+      error: `⚠️ API request failed: ${err.message}`
     });
   }
-});
-
-export default router;
-           
+}
