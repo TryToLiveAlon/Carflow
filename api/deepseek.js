@@ -1,4 +1,3 @@
- // Code by @AzR_Projects
 
 export default {
     async fetch(request) {
