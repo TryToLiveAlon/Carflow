@@ -6,7 +6,7 @@ import sendEmail from "./api/mail.js";
 import lyricsHandler from "./api/lyrics.js";
 import gptHandler4 from "./api/gpt4.js";
 import deepSeek from "./api/deepseek.js";
-
+import Mistral from "./api/mistral.js";
 
 
 const app = express();
@@ -19,6 +19,7 @@ app.use("/api/vehicle", vehicleHandler);
 app.use("/api/gpt", gptHandler);
 app.use("/api/gpt4", gptHandler4);
 app.use("/api/deepseek", deepSeek);
+app.use("/api/mistral", Mistral)
 app.post("/api/mail", sendEmail); // Attach the mail handler
 
 // 404 Route Handling
