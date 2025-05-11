@@ -15,10 +15,10 @@ app.use(express.json());
 app.get("/api/lyrics", lyricsHandler);
 app.use("/api/movie", movieHandler);
 app.use("/api/vehicle", vehicleHandler);
-app.use("/api/gpt", gptHandler);
+app.use("/api/gptai", gptHandler);
 app.use("/api/deepseek", deepSeek);
 app.use("/api/mistral", mistral)
-app.post("/api/mail", sendEmail); // Attach the mail handler
+app.post("/api/mail", sendEmail); // Attach the mail handlera
 
 // 404 Route Handling
 app.use((req, res) => {
