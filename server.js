@@ -15,7 +15,7 @@ app.use(express.json());
 app.get("/api/lyrics", lyricsHandler);
 app.use("/api/movie", movieHandler);
 app.use("/api/vehicle", vehicleHandler);
-app.use("/api/gptai", gptHandler);
+app.use("/api/brain", gptHandler);
 app.use("/api/deepseek", deepSeek);
 app.use("/api/mistral", mistral)
 app.post("/api/mail", sendEmail); // Attach the mail handlera
