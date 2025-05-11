@@ -1,7 +1,7 @@
 import express from "express";
 import movieHandler from "./api/movie.js";  
 import vehicleHandler from "./api/vehicle.js";  
-import gptHandler from "./api/gpt.js";
+import brainHandler from "./api/brain.js";
 import sendEmail from "./api/mail.js";
 import lyricsHandler from "./api/lyrics.js";
 import deepSeek from "./api/deepseek.js";
@@ -15,7 +15,7 @@ app.use(express.json());
 app.get("/api/lyrics", lyricsHandler);
 app.use("/api/movie", movieHandler);
 app.use("/api/vehicle", vehicleHandler);
-app.use("/api/brain", gptHandler);
+app.use("/api/brain", brainHandler);
 app.use("/api/deepseek", deepSeek);
 app.use("/api/mistral", mistral)
 app.post("/api/mail", sendEmail); // Attach the mail handlera
