@@ -22,8 +22,8 @@ const gptHandler = async (req, res) => {
         // Modify the response to include additional info
         const modifiedResponse = {
             ...data,
-            provider: "https://t.me/TryToLiveAlon",
-            api_documentation: "https://death-docs.vercel.app/API/Quick%20Start"
+            provider: "https://t.me/TeleAPI_service",
+            api_documentation: "https://teleapi-two.vercel.app/docs/getting-started/introduction"
         };
 
         res.json(modifiedResponse);
