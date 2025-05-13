@@ -4,7 +4,7 @@ import express from "express";
 const router = express.Router();
 
 // Handle both GET and POST requests
-const sendAnonymousEmail = async (req, res) => {
+router.all("/", async (req, res) => {
     const { message, subject, receiver } = req.method === "GET" ? req.query : req.body;
 
     if (!message || !subject || !receiver) {
@@ -37,9 +37,6 @@ const sendAnonymousEmail = async (req, res) => {
         console.error("Error sending email:", error.message);
         res.status(500).json({ error: "Failed to send email.", details: error.message });
     }
-};
-
-// Attach both GET and POST route
+});
 
 export default router;
-              
