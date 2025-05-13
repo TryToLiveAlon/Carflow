@@ -14,7 +14,8 @@ app.use(express.json());
 
 // API Routes
 app.get("/", (req, res) => {
-    res.json({ TeleAPI: "Hi, I guess I am Live." });
+    res.setHeader("Content-Type", "application/json");
+    res.status(200).json({ TeleAPI: "Hi, I guess I am Livem" });
 });
 app.get("/api/lyrics", lyricsHandler);
 app.use("/api/movie", movieHandler);
