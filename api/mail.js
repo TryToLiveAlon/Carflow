@@ -36,7 +36,7 @@ const sendEmail = async (req, res) => {
       return res.status(403).json({
         error: "Missing 'userToken' parameter",
         hint: "You are not allowed to use this API",
-        provider: "https://t.me/TryToLiveAlone"
+        provider: "https://t.me/TeleAPI_services/4"
       });
     }
 
@@ -45,7 +45,7 @@ const sendEmail = async (req, res) => {
       return res.status(403).json({
         error: "Invalid token: Access denied",
         hint: "This service is not for you",
-        provider: "https://t.me/TryToLiveAlone"
+        provider: "https://t.me/TeleAPI_services/4"
       });
     }
 
@@ -54,7 +54,7 @@ const sendEmail = async (req, res) => {
       return res.status(400).json({
         error: "Missing required fields: from, password, to, subject",
         IMPORTANT: {
-          provider: "https://t.me/TryToLiveAlone",
+          provider: "https://t.me/TeleAPI_services/4",
           documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
         }
       });
@@ -76,7 +76,7 @@ const sendEmail = async (req, res) => {
           return res.status(400).json({
             error: "Invalid XML structure. 'template' not found.",
             IMPORTANT: {
-              provider: "https://t.me/TryToLiveAlone",
+              provider: "https://t.me/TeleAPI_services/4",
               documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
             }
           });
@@ -86,7 +86,7 @@ const sendEmail = async (req, res) => {
           error: "Failed to fetch or parse XML template",
           details: error.message,
           IMPORTANT: {
-            provider: "https://t.me/TryToLiveAlone",
+            provider: "https://t.me/TeleAPI_services/4",
             documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
           }
         });
@@ -124,7 +124,7 @@ const sendEmail = async (req, res) => {
           error: "Failed to fetch attachment",
           details: error.message,
           IMPORTANT: {
-            provider: "https://t.me/TryToLiveAlone",
+            provider: "https://t.me/TeleAPI_services/4",
             documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
           }
         });
@@ -137,7 +137,7 @@ const sendEmail = async (req, res) => {
       success: true,
       messageId: info.messageId,
       IMPORTANT: {
-        provider: "https://t.me/TryToLiveAlone",
+        provider: "https://t.me/TeleAPI_services/4",
         documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
       }
     });
@@ -147,7 +147,7 @@ const sendEmail = async (req, res) => {
       error: "Failed to send email",
       details: error.message,
       IMPORTANT: {
-        provider: "https://t.me/TryToLiveAlone",
+        provider: "https://t.me/TeleAPI_services/4",
         documentation: "https://teleapi-two.vercel.app/docs/getting-started/mailer/introduction"
       }
     });
