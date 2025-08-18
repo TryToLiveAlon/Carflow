@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 app.get("/api/lyrics", lyricsHandler);
 app.use("/api/movie", movieHandler);
 app.use("/api/vehicle", vehicleHandler);
-app.use("/api/brain", brainHandler);
+app.use("/api/bigb", brainHandler);
 app.use("/api/deepseek", deepSeek);
 app.use("/api/mistral", mistral);
 app.use("/api/mail-id", mailHandler);
